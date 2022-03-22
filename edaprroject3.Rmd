@@ -1,0 +1,72 @@
+---
+title: "Exploratory Data Analysis - Project 3"
+author: "Justin Williams"
+date: "3/21/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r import-packages, message=FALSE}
+library(tidyverse)
+library(RMySQL)
+```
+
+## Exploratory Data Analysis - Project 3
+
+This document will perform exploratory data analysis on a loan dataset from Kaggle entitled the LendingClub. 
+
+### Import data from database
+
+```{r connection-object}
+#dbConnect(MySQL(),
+          #user = 'data607user',
+          #password = 'harry2022',
+          #dbname = 'data607p3',
+          #host_local = '127.0.0.1')
+```
+
+Data table LendingClub was exported from MySQLWorkbench and imported as CSV.
+
+```{r import-csv}
+loan_df <- read_delim(file = "LendingClub.csv")
+
+# preview df
+glimpse(loan_df)
+```
+
+So far interested in the following columns:
+
+`addr_state` - The state provided by the borrower in the loan application
+
+`avg_cur_bal` - Average current balance of all accounts
+
+`delinq_amt` - The past-due amount owed for the accounts on which the borrower is now delinquent.
+
+`emp_title` - The job title supplied by the Borrower when applying for the loan.*
+
+`emp_length` - Employment length in years. Possible values are between 0 and 10 where 0 means less than one year an...
+
+`grade` - LC assigned loan grade
+
+`loan_amt`- The listed amount of the loan applied for by the borrower. If at some point in time, the credit depa...
+
+`funded_amnt` - The total amount committed to that loan at that point in time.
+
+`int_rate` - Interest Rate on the loan
+
+`max_bal_hc` - Maximum current balance owed on all revolving accounts
+
+`purpose` - A category provided by the borrower for the loan request.
+
+`revol_bal` - Total credit revolving balance
+
+`total_bal_ex_mort` - Total credit balance excluding mortgage
+
+`zip_code` - The first 3 numbers of the zip code provided by the borrower in the loan application.
+
+`hardship_flag` - Flags whether or not the borrower is on a hardship plan
+
+

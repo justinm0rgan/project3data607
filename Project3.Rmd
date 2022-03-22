@@ -1,0 +1,85 @@
+---
+title: "DATA607 - Project 3"
+author: "Team Gryffindor"
+output:
+  pdf_document: default
+  html_document: 
+    includes:
+      in_header: header.html
+    css: ./lab.css
+    highlight: pygments
+    theme: cerulean
+    toc: true
+    toc_float: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r global-options, include=FALSE}
+knitr::opts_chunk$set(eval = TRUE, message = FALSE, warning = FALSE)
+rm(list=ls())
+```
+
+# Introduction
+
+# General Setup
+
+
+# R scripts for data access and manipulation
+
+## Required packages
+We will use RMariaDB for connectivity from R to the remote AWS Linux server's MySQL.  tidyverse for general data wrangling. reshape2 will be used for a few data transformations.
+
+```{r load-packages}
+library(RMariaDB)
+library(tidyverse)
+library(reshape2)
+```
+
+## Connect R to the remote MySQL server 
+
+
+```{r connect_database}
+mypwd <- "harry2022"
+host_tunnel = '127.0.0.1'
+host_local = '192.168.1.1'
+
+# If you are connecting from a computer that has MySQL Server installed please use port 3307 ALSO make sure your tunnel MobaXterm is set to 3307. If this computer doesn't have have MYSQL Server installed use port 3306 (normal) and keep tunnel with 3306.
+
+cunyDB <- dbConnect(RMariaDB::MariaDB(),
+                  user= 'data607user',
+                  password= mypwd,
+                  dbname= 'data607p3',
+                  host=host_tunnel,
+                  port = 3306)
+
+```
+
+Run the following command to verify the connection is ok. You should see a list of tables.
+
+```{r list-tables}
+dbListTables(cunyDB)
+```
+
+## Our first query from R to MySQL
+
+Let's run a simple query of the ratings submitted. We can list ALL records or just the first n records.
+
+```{r run-query1}
+query<-'select * from LendingClub'
+result <- dbSendQuery(cunyDB,query)
+# to fetch 10 records use: resultsdf <- dbFetch(result, 10)
+resultsdf <- dbFetch(result)
+glimpse(resultsdf)
+```
+
+**At this point all the record from SQL table LendingCLub is in your "resultdf" dataframe and can be used normally from R**
+
+**If you are no longer going to fetch data from SQL Server you can disconnect**
+
+```{r disconnet-db}
+dbHasCompleted(result)
+dbClearResult(result)
+dbDisconnect(cunyDB)
+```
+
