@@ -12,11 +12,13 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r import-packages, message=FALSE}
 library(tidyverse)
 library(RMySQL)
+library(scales)
+library(RColorBrewer)
 ```
 
 ## Exploratory Data Analysis - Project 3
 
-This document will perform exploratory data analysis on a loan dataset from Kaggle entitled the LendingClub. 
+This document will perform exploratory data analysis on a loan dataset from Kaggle entitled the <a href="https://www.kaggle.com/datasets/wordsforthewise/lending-club">LendingClub.</a>
 
 ### Import data from database
 
@@ -36,6 +38,10 @@ loan_df <- read_delim(file = "LendingClub.csv")
 # preview df
 glimpse(loan_df)
 ```
+
+Data  has 63 columns and 686 rows.
+
+<a href="https://www.kaggle.com/jonchan2003/lending-club-data-dictionary">Data Dictionary</a> can be referenced to specify column meanings.
 
 So far interested in the following columns:
 
@@ -69,4 +75,98 @@ So far interested in the following columns:
 
 `hardship_flag` - Flags whether or not the borrower is on a hardship plan
 
+### Job type
+
+Let's look at the `emp_title` column to see what types of jobs folks with loans out had.
+
+```{r count-emptitle}
+loan_df %>%
+  count(emp_title) %>% 
+  arrange(desc(n)) %>% 
+  slice_max(n, n = 10) %>% 
+  ggplot(aes(reorder(emp_title, n),n)) +
+    geom_bar(stat = "identity") +
+    coord_flip() +
+    scale_fill_gradient2(high = muted("blue")) +
+    labs(x="", y="", subtitle = "Count by Employe Title")
+```
+Some titles are the same, just have different cases and perhaps some white space. Let's take care of this.
+
+```{r emp-title-convert-lower-trim-ws}
+loan_df <- loan_df %>% 
+  mutate(emp_title = trimws(tolower(emp_title))) 
+```
+
+Let's try the count again chart again, this time with color.
+
+```{r}
+loan_df %>%
+  count(emp_title) %>% 
+  arrange(desc(n)) %>% 
+  slice_max(n, n = 10, with_ties = F) %>% 
+  ggplot(aes(reorder(emp_title, n),n, fill = n)) +
+    geom_bar(stat = "identity") +
+    coord_flip() +
+    scale_fill_gradient2(high = muted("blue"), mid = muted("red")) +
+    labs(x="", y="", subtitle = "Top 10 - Count by Employe Title") +
+    theme(legend.position = "none")
+```
+Can see a very different story here. Now top 3 are:
+- `NA`
+- `teacher`
+- `manager`
+
+Let's look at that as a percentage:
+
+```{r proportion-emptitle}
+loan_df %>% 
+  count(emp_title) %>% 
+  mutate(p = n/sum(n)) %>% 
+  slice_max(n, n = 10, with_ties = F) %>% 
+  ggplot(aes(reorder(emp_title, n),p, fill = p)) +
+    geom_bar(stat = "identity") +
+    coord_flip() +
+    scale_fill_gradient2(high = muted("blue"), mid = muted("red")) +
+    labs(x="", y="", subtitle = "Top 10 - % by Employee Title") +
+    scale_y_continuous(labels = percent) +
+    theme(legend.position = "none")
+```
+So highest proportion of job titles reported by percentage are:
+  - `teacher` with ~3.5%
+  - `manager` with ~3.5%
+  - `owner` with ~2.4%
+  
+### Grade
+
+LendingClub assigns a grade for each loan, let's look at the different grades and then sort it with `emp_title`.
+
+```{r grades-count}
+loan_df %>% 
+  count(grade) %>% 
+  ggplot(aes(reorder(grade,n), n)) + 
+    geom_bar(stat = "identity") +
+    coord_flip() +
+    labs(x = "Grade", y = "Count", subtitle = "Count of Grade")
+```
+`B` is the most frequent `grade`, let's look at how this relates to `emp_title`.
+
+```{r loan-status}
+unique(loan_df$loan_status)
+```
+
+
+```{r emp-title-vs-grade}
+loan_df %>% 
+  ggplot(aes())
+```
+
+
+
+### Scatterplots
+
+```{r}
+library(GGally)
+loan_df %>% 
+  ggpairs(columns = 2:5)
+```
 
