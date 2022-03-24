@@ -138,6 +138,7 @@ So highest proportion of job titles reported by percentage are:
   
 ### Grade
 
+
 LendingClub assigns a grade for each loan, let's look at the different grades and then sort it with `emp_title`.
 
 ```{r grades-count}
