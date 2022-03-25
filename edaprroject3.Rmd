@@ -144,12 +144,61 @@ LendingClub assigns a grade for each loan, let's look at the different grades an
 ```{r grades-count}
 loan_df %>% 
   count(grade) %>% 
-  ggplot(aes(reorder(grade,n), n)) + 
+  ggplot(aes(reorder(grade,n), n, fill = n)) + 
+    geom_bar(stat = "identity") +
+    scale_fill_gradient2(high = muted("blue"), mid = muted("red")) +
+    coord_flip() +
+    labs(x = "Grade", y = "Count", subtitle = "Count of Grade") +
+    theme(legend.position = "none")
+```
+
+Grade by proportion.
+
+```{r grade-proportion}
+loan_df %>% 
+  count(grade) %>% 
+  mutate(p = n/sum(n)) %>% 
+  slice_max(n, n = 10, with_ties = F) %>% 
+  ggplot(aes(reorder(grade, n),p, fill = p)) +
     geom_bar(stat = "identity") +
     coord_flip() +
-    labs(x = "Grade", y = "Count", subtitle = "Count of Grade")
+    scale_fill_gradient2(high = muted("blue"), mid = muted("red")) +
+    labs(x="", y="", subtitle = "% by Grade") +
+    scale_y_continuous(labels = percent) +
+    theme(legend.position = "none")
 ```
-`B` is the most frequent `grade`, let's look at how this relates to `emp_title`.
+
+`B` is the most frequent `grade`, and makes up about 30% of loans.
+
+let's look at how this relates to `emp_title`.
+
+```{r top-5-emp-title}
+# create df for top 5 emp title
+top_5_emp_title <- loan_df %>%
+  count(emp_title) %>% 
+  filter(!is.na(emp_title)) %>% 
+  arrange(desc(n)) %>% 
+  head(5)
+
+# filter by top5 emp title
+loan_df %>% 
+  filter(emp_title%in%top_5_emp_title$emp_title) %>%
+  group_by(emp_title, grade) %>% 
+  summarise(
+    count = n()
+  ) %>% 
+  ggplot(aes(x = factor(emp_title,
+      levels = as.vector(top_5_emp_title$emp_title)),
+      y = count, 
+      fill = grade)) + 
+    geom_bar(stat = "identity", position = "fill") +
+    scale_fill_brewer(palette = "Dark2") +
+    labs(x = "", y = "Percent", subtitle = "Top 5 Jobs by Loan Grade") +
+    scale_y_continuous(labels = percent) +
+    guides(fill=guide_legend(title = "Grade")) +
+    theme_minimal()
+```
+
 
 ```{r loan-status}
 unique(loan_df$loan_status)
