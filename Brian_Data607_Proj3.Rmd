@@ -1,0 +1,101 @@
+---
+title: "Data607_Proj3"
+author: "Brian Singh"
+date: '2022-03-23'
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r}
+library(data.table)
+library(readr)
+library(tidyverse)
+library(curl)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(lubridate)
+library(usmap)
+library(reshape2)
+#accepted <- read.csv(curl("https://raw.githubusercontent.com/brsingh7/DATA607/main/Project3/loandata.csv"))
+# accepted <- read.csv(curl("https://raw.githubusercontent.com/brsingh7/DATA607/main/Project3/loandata.csv"))
+loans_bs <- read.csv(curl("https://raw.githubusercontent.com/brsingh7/DATA607/main/Project3/project3_sql.csv"))
+loans_bs2 <- loans_bs
+```
+
+```{r}
+#What are the most common employer titles?
+loans_bs2 %>%
+    group_by(emp_title) %>%
+  filter(emp_title != "") %>%
+    summarise(count = n()) %>%
+    top_n(n = 10, wt = count) %>%
+  ggplot(aes(x = reorder(emp_title,count), y = count)) +
+    geom_bar(stat = "identity") +
+  labs(title = "Loan Counts by Employee Type (top 10) N/A's filtered", x="Employee Title",y="Count") +
+  coord_flip()
+```
+```{r}
+#What's the most common purpose that a client requests a loan?
+loans_bs2 %>%
+    group_by(title) %>%
+  filter(title != "") %>%
+    summarise(count = n()) %>%
+    top_n(n = 10, wt = count) %>%
+  ggplot(aes(x = reorder(title,count), y = count)) +
+    geom_bar(stat = "identity") +
+  labs(title = "Loan Counts by Loan Purpose (top 10, N/A's filtered)", x="Purpose of Loan",y="Count") +
+  coord_flip()
+```
+```{r}
+#What’s the most common state where loan applications are submitted?
+loans_bs2 %>%
+    group_by(addr_state) %>%
+  filter(addr_state != "") %>%
+    summarise(count = n()) %>%
+    top_n(n = 10, wt = count) %>%
+  ggplot(aes(x = reorder(addr_state,count), y = count)) +
+    geom_bar(stat = "identity") +
+  labs(title = "Loan Counts by State (Top 10)", x="State",y="Count") +
+  coord_flip()
+
+states<-read.csv(curl("https://raw.githubusercontent.com/brsingh7/DATA607/main/states.csv"))
+loans_bs3 <- merge(loans_bs2,states,by.x=c("addr_state"),by.y=c("Code"),all.y=T)
+  
+state_counts <- loans_bs3 %>%
+  group_by(State) %>%
+  summarise(count=n(), avg_loan=mean(loan_amnt))
+state_counts$fips <- fips(state_counts$State)
+apps <- plot_usmap(data = state_counts, values = "count", color = "black", labels=TRUE) + 
+  scale_fill_continuous(low = "white", high = "blue", name = "Count by State", label = scales::comma) + 
+    labs(title="Accepted Loan Applications by State") +
+  theme(legend.position = "right")
+
+apps$layers[[2]]$aes_params$size <- 3
+apps
+
+avg_state <- plot_usmap(data = state_counts, values = "avg_loan", color = "black", labels=TRUE) + 
+  scale_fill_continuous(low = "white", high = "red", name = "Avg $ by State", label = scales::comma) + 
+    labs(title="Avg Loan Amount ($) by State") +
+  theme(legend.position = "right")
+
+avg_state$layers[[2]]$aes_params$size <- 3
+avg_state
+```
+
+```{r}
+#https://en.wikipedia.org/wiki/List_of_U.S._states_and_territories_by_income
+income_2018<-read.csv(curl("https://raw.githubusercontent.com/brsingh7/DATA607/main/Project3/income_2018.csv"))
+loans_2018<- loans_bs3 %>%
+  group_by(addr_state) %>%
+  summarise(avg_ln=mean(funded_amnt))
+
+loan_v_salary <- left_join(loans_2018,income_2018,by=c("addr_state"="Code"))
+loan_v_salary %>%
+  ggplot(aes(x=avg_inc_2018, y=avg_ln,colour=addr_state)) +
+  geom_point() +
+  labs(title = "Income vs. Loan Amount by State in 2018", x="Average Loan",y="Average Income",colour="State")
+```
+
+
