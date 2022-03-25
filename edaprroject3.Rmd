@@ -138,7 +138,6 @@ So highest proportion of job titles reported by percentage are:
   
 ### Grade
 
-
 LendingClub assigns a grade for each loan, let's look at the different grades and then sort it with `emp_title`.
 
 ```{r grades-count}
@@ -158,7 +157,6 @@ Grade by proportion.
 loan_df %>% 
   count(grade) %>% 
   mutate(p = n/sum(n)) %>% 
-  slice_max(n, n = 10, with_ties = F) %>% 
   ggplot(aes(reorder(grade, n),p, fill = p)) +
     geom_bar(stat = "identity") +
     coord_flip() +
@@ -180,9 +178,9 @@ top_5_emp_title <- loan_df %>%
   arrange(desc(n)) %>% 
   head(5)
 
-# filter by top5 emp title
+# compare emp title by grade
 loan_df %>% 
-  filter(emp_title%in%top_5_emp_title$emp_title) %>%
+  filter(emp_title%in%top_5_emp_title$emp_title) %>% # filter top5 emp
   group_by(emp_title, grade) %>% 
   summarise(
     count = n()
@@ -199,6 +197,36 @@ loan_df %>%
     theme_minimal()
 ```
 
+### Loan status
+
+I am interested to see distribution of loan status
+
+```{r}
+loan_df %>%
+  count(loan_status) %>%
+  mutate(p = n / sum(n)) %>% 
+  ggplot(aes(reorder(loan_status, p), p, fill = loan_status)) + 
+    geom_bar(stat = "identity") +
+    coord_flip() +
+    labs(x = "", y = "", subtitle = "% by Loan status") +
+    scale_y_continuous(labels = percent) +
+    theme(legend.position = "none") +
+    scale_fill_brewer(palette = "Dark2")
+```
+
+Over 80% of loans are current...who are the outliers that are late?
+
+```{r late-loan-df}
+loan_df %>% 
+  filter(loan_status == "Late (31-120 days)" | 
+           loan_status == "Late (16-30 days") %>% 
+  group_by(emp_title) %>% 
+  summarise(
+    count = n()
+  ) %>% 
+  arrange(desc(count))
+```
+So late loan payments seem to be an anomaly and no real pattern in regard to ``emp_title`.
 
 ```{r loan-status}
 unique(loan_df$loan_status)
