@@ -18,6 +18,7 @@ library(usmap)
 library(lubridate)
 library(reshape2)
 library(curl)
+library(rvest)
 ```
 
 ## Exploratory Data Analysis - Project 3
@@ -41,7 +42,9 @@ This document will perform exploratory data analysis on a loan dataset from Kagg
 <a href="https://www.kaggle.com/wordsforthewise/lending-club?select=accepted_2007_to_2018Q4.csv.gz"> Kaggle LendingClub </a> data set was modified by extrapolating all data prior to 2018, and imported form MySQLWorkbench into R.
 
 ```{r import-data, message=FALSE}
-loan_df <- read_delim(file = "../data/LendingClub.csv")
+url <- "http://data607project3.com/list-all.php"
+data_html <- read_html(url)
+loan_df <- html_table(data_html, fill = T)[[1]]
 
 # preview df
 glimpse(loan_df)
