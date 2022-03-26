@@ -1,0 +1,166 @@
+---
+title: "DATA607 - Project 3"
+author: "Team Gryffindor"
+
+---
+
+```{r global-options, include=FALSE}
+knitr::opts_chunk$set(eval = TRUE, message = FALSE, warning = FALSE)
+rm(list=ls())
+```
+
+# Introduction
+
+# General Setup
+
+
+# R scripts for data access and manipulation
+
+## Required packages
+We will use RMariaDB for connectivity from R to the remote AWS Linux server's MySQL.  tidyverse for general data wrangling. reshape2 will be used for a few data transformations.
+
+```{r load-packages}
+library(RMariaDB)
+library(tidyverse)
+library(reshape2)
+```
+
+## Connect R to the remote MySQL server 
+
+
+```{r connect_database}
+mypwd <- "harry2022"
+host_tunnel = '127.0.0.1'
+host_local = '192.168.1.1'
+
+# If you are connecting from a computer that has MySQL Server installed please use port 3307 ALSO make sure your tunnel MobaXterm is set to 3307. If this computer doesn't have have MYSQL Server installed use port 3306 (normal) and keep tunnel with 3306.
+
+cunyDB <- dbConnect(RMariaDB::MariaDB(),
+                  user= 'data607user',
+                  password= mypwd,
+                  dbname= 'data607p3',
+                  host=host_tunnel,
+                  port = 3307)
+
+```
+
+Run the following command to verify the connection is ok. You should see a list of tables.
+
+```{r list-tables}
+dbListTables(cunyDB)
+```
+
+## Our first query from R to MySQL
+
+Let's run a simple query of the ratings submitted. We can list ALL records or just the first n records.
+
+```{r run-query1}
+query<-'select * from LendingClub'
+result <- dbSendQuery(cunyDB,query)
+# to fetch 10 records use: resultsdf <- dbFetch(result, 10)
+resultsdf <- dbFetch(result)
+glimpse(resultsdf)
+```
+
+###
+
+
+```{r}
+head (resultsdf)
+colnames(resultsdf)
+```
+
+Some analysis we will do on this dataset include, but are not limited to:
+  What are the most common employer titles?
+  What's the most common purpose that a client requests a loan?
+  What’s the most common state where loan applications are submitted?
+
+
+
+#### This is to pull the columns needed for analysis and remove unnecessary columns
+
+```{r}
+df<- resultsdf[, c("int_rate", "zip_code", "loan_amnt", "home_ownership","loan_status","title", "addr_state","annual_inc","loan_amnt","issue_d","grade", "emp_title")]
+head(df)
+
+```
+
+
+### Create a new dataframe
+
+
+```{r}
+df1<- df[, c( "loan_status","annual_inc")]
+```
+
+
+#### Average income by loan status 
+  
+```{r}
+
+df2 %>%
+    group_by(loan_status) %>%
+    ggplot(aes(x=loan_status,y=annual_inc, fill = loan_status)) +
+    geom_bar(Country = "dodge",
+        stat = "summary",
+        fun = "mean") +
+    ggtitle("Average income by loan status") + ylab("Average income")
+
+```
+                   
+               
+
+### Library loaded
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+```
+
+### Find the top 5 states with the hightest loan submition
+
+
+```{r}
+
+df %>%
+    group_by(addr_state) %>%
+  filter(addr_state != "") %>%
+    summarise(count = n()) %>%
+    top_n(n = 5, wt = count) %>%
+  ggplot(aes(x = reorder(addr_state,count), y = count, fill=addr_state )) +
+    geom_bar(stat = "identity") +
+  labs(title = "Loan Counts by State", x="Top 5 State",y="Count") +
+  coord_flip()
+```
+
+
+### 2.What's the most common purpose that a client requests a loan?
+
+
+
+```{r}
+df%>%
+    group_by(title) %>%
+  filter(title != "") %>%
+    summarise(count = n()) %>%
+    top_n(n = 10, wt = count) %>%
+  ggplot(aes(x = reorder(title,count), y = count, fill=title )) +
+    geom_bar(stat = "identity") +
+  labs(title = "Most common purpose that a client requests a loan", x="Loan Title",y="Count") +
+  coord_flip()
+```
+
+
+
+
+**At this point all the record from SQL table LendingCLub is in your "resultdf" dataframe and can be used normally from R**
+
+**If you are no longer going to fetch data from SQL Server you can disconnect**
+
+```{r disconnet-db}
+dbHasCompleted(result)
+dbClearResult(result)
+dbDisconnect(cunyDB)
+```
+

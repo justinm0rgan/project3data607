@@ -88,7 +88,7 @@ loan_df %>%
     geom_bar(stat = "identity") +
     coord_flip() +
     scale_fill_gradient2(high = muted("blue")) +
-    labs(x="", y="", subtitle = "Count by Employe Title")
+    labs(x="", y="", subtitle = "Employe Title Count")
 ```
 Some titles are the same, just have different cases and perhaps some white space. Let's take care of this.
 
@@ -108,7 +108,7 @@ loan_df %>%
     geom_bar(stat = "identity") +
     coord_flip() +
     scale_fill_gradient2(high = muted("blue"), mid = muted("red")) +
-    labs(x="", y="", subtitle = "Top 10 - Count by Employe Title") +
+    labs(x="", y="", title = "Employe Title Count (Top 10") +
     theme(legend.position = "none")
 ```
 Can see a very different story here. Now top 3 are:
@@ -127,7 +127,7 @@ loan_df %>%
     geom_bar(stat = "identity") +
     coord_flip() +
     scale_fill_gradient2(high = muted("blue"), mid = muted("red")) +
-    labs(x="", y="", subtitle = "Top 10 - % by Employee Title") +
+    labs(x="", y="", title = "% by Employee Title (Top 10)") +
     scale_y_continuous(labels = percent) +
     theme(legend.position = "none")
 ```
@@ -147,7 +147,7 @@ loan_df %>%
     geom_bar(stat = "identity") +
     scale_fill_gradient2(high = muted("blue"), mid = muted("red")) +
     coord_flip() +
-    labs(x = "Grade", y = "Count", subtitle = "Count of Grade") +
+    labs(x = "Grade", y = "Count", title = "Loan Grade Count") +
     theme(legend.position = "none")
 ```
 
@@ -161,7 +161,7 @@ loan_df %>%
     geom_bar(stat = "identity") +
     coord_flip() +
     scale_fill_gradient2(high = muted("blue"), mid = muted("red")) +
-    labs(x="", y="", subtitle = "% by Grade") +
+    labs(x="", y="", title = "% by Grade") +
     scale_y_continuous(labels = percent) +
     theme(legend.position = "none")
 ```
@@ -191,7 +191,7 @@ loan_df %>%
       fill = grade)) + 
     geom_bar(stat = "identity", position = "fill") +
     scale_fill_brewer(palette = "Dark2") +
-    labs(x = "", y = "Percent", subtitle = "Top 5 Jobs by Loan Grade") +
+    labs(x = "", y = "Percent", title = "Top 5 Jobs by Loan Grade") +
     scale_y_continuous(labels = percent) +
     guides(fill=guide_legend(title = "Grade")) +
     theme_minimal()
@@ -208,7 +208,7 @@ loan_df %>%
   ggplot(aes(reorder(loan_status, p), p, fill = loan_status)) + 
     geom_bar(stat = "identity") +
     coord_flip() +
-    labs(x = "", y = "", subtitle = "% by Loan status") +
+    labs(x = "", y = "", title = "% by Loan status") +
     scale_y_continuous(labels = percent) +
     theme(legend.position = "none") +
     scale_fill_brewer(palette = "Dark2")
@@ -224,7 +224,8 @@ loan_df %>%
   summarise(
     count = n()
   ) %>% 
-  arrange(desc(count))
+  arrange(desc(count)) %>% 
+  head(10)
 ```
 So late loan payments seem to be an anomaly and no real pattern in regard to ``emp_title`.
 
