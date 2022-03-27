@@ -35,6 +35,8 @@ This document will perform exploratory data analysis on a loan dataset from Kagg
   
 *Does loan grade or loan status have anything to do with job title?*
 
+*Does FICO score effect interest rate?*
+
 *How do loan amounts relate to salaries?*
 
 ### Import data
@@ -313,6 +315,29 @@ loan_df %>%
 ```
 So late loan payments seem to be an anomaly and no real pattern in regard to ``emp_title`.
 
+### Does FICO score effect interest rate?
+
+We expect that it would, but let's confirm.
+
+```{r fico-interest}
+credit_intrate <-loan_df %>%
+  ggplot(aes(x=int_rate, y=fico_range_high,col=annual_inc)) +
+  geom_point() +
+    geom_smooth(method=lm) +
+    labs(title = "Interest Rate based on FICO Score by Loan Type", x="Loan Int Rate (%)",y="FICO Score",colour="Annual Income") +
+  scale_colour_continuous(name = "Income",
+                          label = dollar_format(prefix = "$",
+                                                scale = .001,
+                                                suffix = "k")) +
+    facet_wrap(~title)
+
+ggsave("../images/fico_interest.png", plot = credit_intrate)
+
+credit_intrate
+```
+
+We can clearly see a negative relationship with FICO score and interest rate. If you have a higher credit score your interest rate goes down. Seems counter intuitive no? That's capitalism for ya!
+
 ### Loan attributes by State
 
 What are the most common states where loan applications are submitted?
@@ -428,7 +453,7 @@ loan_v_salary_plot <- loan_v_salary %>%
                                                 suffix = "k")) +
   theme(legend.position = "right")
 
-ggsave("../images/loan_vs.sal.png")
+ggsave("../images/loan_vs_sal.png")
 
 loan_v_salary_plot
 ```
@@ -438,5 +463,6 @@ Whereas states that had the highest counts of loans like `California` and `New Y
 
 ## Conclusion
 
+In conclusion, we found the most common job titles were, `NA`, `managers`, `teachers`, `owners`, `registered nurse` and `driver`. However, `teachers` had the highest proportion of E graded loans, whilst `owners` had the the highest proportion of A graded loans. Loan purpose requests were dominated by `Debt consolidation` and `Credit Card refinancing`. FICO scores had a clearly negative linear relationship with loan rates. States with the most loan requests were California, NY and Florida, however Missouri and Idaho had the highest mean loan amount. Strikingly, Missouri also had one of the lowest mean annual incomes, while states such as Maryland/DC, Boston, New Jersey and Massachusetts, had the highest salaries and relatively modest loan rates. 
 
-
+Next steps would be to merge demographic data from the census api to conduct an analysis of how this all relates to different aspects such as income, race, sex and more focused geographical boundaries. 
