@@ -417,7 +417,7 @@ avg_state
 So now we can see the states with the highest average loan amount are:
 
 - `Idaho`
-- `Missouri`.
+- `Mississippi`.
 
 Interesting, well now let's get some income data from <a href = "https://en.wikipedia.org/wiki/List_of_U.S._states_and_territories_by_income"> Wikipedia </a>, and look at loan amounts vs. salary.
 
@@ -458,11 +458,11 @@ ggsave("../images/loan_vs_sal.png")
 loan_v_salary_plot
 ```
 
-We can see there is not exactly a linear relatinship between average loan amount per state and average income. However we can see `Missouri (MS)` which from the previous map we could see had the highest average loan amount, also has one of the lowest incomes.<br>
+We can see there is not exactly a linear relationship between average loan amount per state and average income. However we can see `Mississippi (MS)` which from the previous map we could see had the highest average loan amount, also has one of the lowest incomes.<br>
 Whereas states that had the highest counts of loans like `California` and `New York` had lower average loan amounts and much higher average incomes.
 
 ## Conclusion
 
-In conclusion, we found the most common job titles were, `NA`, `managers`, `teachers`, `owners`, `registered nurse` and `driver`. However, `teachers` had the highest proportion of E graded loans, whilst `owners` had the the highest proportion of A graded loans. Loan purpose requests were dominated by `Debt consolidation` and `Credit Card refinancing`. FICO scores had a clearly negative linear relationship with loan rates. States with the most loan requests were California, NY and Florida, however Missouri and Idaho had the highest mean loan amount. Strikingly, Missouri also had one of the lowest mean annual incomes, while states such as Maryland/DC, Boston, New Jersey and Massachusetts, had the highest salaries and relatively modest loan rates. 
+In conclusion, we found the most common job titles were, `NA`, `managers`, `teachers`, `owners`, `registered nurse` and `driver`. However, `teachers` had the highest proportion of E graded loans, whilst `owners` had the the highest proportion of A graded loans. Loan purpose requests were dominated by `Debt consolidation` and `Credit Card refinancing`. FICO scores had a clearly negative linear relationship with loan rates. States with the most loan requests were California, NY and Florida, however Mississippi and Idaho had the highest mean loan amount. Strikingly, Missouri also had one of the lowest mean annual incomes, while states such as Maryland/DC, Boston, New Jersey and Massachusetts, had the highest salaries and relatively modest loan rates. 
 
 Next steps would be to merge demographic data from the census api to conduct an analysis of how this all relates to different aspects such as income, race, sex and more focused geographical boundaries. 
